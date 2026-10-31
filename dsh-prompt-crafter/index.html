@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dsh-prompt-crafter · 提示词一键工匠插件官网</title>
+  <meta name="description" content="DeepSeek Harness 桌面端提示词优化插件：输入框原生一键改写，内置完全免费模型端点，三档力度自适应，开箱即用。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2358a6ff'><circle cx='12' cy='12' r='10'/></svg>">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --border-hover: #58a6ff;
+      --text: #c9d1d9;
+      --text-heading: #f0f6fc;
+      --text-muted: #8b949e;
+      --primary: #58a6ff;
+      --primary-hover: #79c0ff;
+      --accent: #238636;
+      --tag-bg: #21262d;
+      --code-bg: #0a0d12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; width: 100%; }
+
+    /* Nav */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--text-heading);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav-links { display: flex; gap: 1.25rem; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; }
+    .nav-links a:hover { color: var(--primary); }
+
+    /* Hero */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.25);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      max-width: 760px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--primary); border: 1px solid var(--primary); color: #0d1117; font-weight: 600; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-outline { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-heading); }
+    .btn-outline:hover { border-color: var(--border-hover); color: var(--primary); }
+
+    /* Live Interactive Simulator */
+    .simulator {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2.5rem 0;
+    }
+
+    .sim-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .sim-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .presets {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      font-size: 0.76rem;
+      padding: 0.2rem 0.55rem;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .preset-btn:hover { border-color: var(--primary); color: var(--text-heading); }
+
+    .sim-box {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .sim-textarea {
+      width: 100%;
+      height: 90px;
+      padding: 0.8rem;
+      background: #0a0d12;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-heading);
+      font-size: 0.92rem;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+    }
+
+    .sim-textarea:focus { border-color: var(--primary); }
+
+    .sim-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .level-tabs {
+      display: inline-flex;
+      background: #0a0d12;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    .level-tab {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .level-tab.active {
+      background: var(--card-bg);
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    .sim-status {
+      font-size: 0.82rem;
+      color: #3fb950;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .sim-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #3fb950;
+      display: inline-block;
+    }
+
+    /* Section Cards */
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin: 2.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.35rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 0.4rem;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0 2rem;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background: #0a0d12;
+      color: var(--text-heading);
+      font-weight: 600;
+    }
+
+    /* Code Box */
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.9rem 1.1rem;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      color: #79c0ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    footer a { color: var(--text); text-decoration: none; }
+    footer a:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 导航栏 -->
+    <nav class="nav-bar">
+      <a href="../dsh-plugins/" class="nav-brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        <span>返回 DSH 插件集</span>
+      </a>
+      <div class="nav-links">
+        <a href="../">个人项目首页</a>
+        <a href="https://github.com/MCJF28/dsh-prompt-crafter" target="_blank">GitHub 源码</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header>
+      <div class="badge">开源插件 · 开箱即用 · 零配置免费通道</div>
+      <h1>dsh-prompt-crafter</h1>
+      <p class="hero-desc">
+        输入框发送键旁的优化按钮：写完一段粗糙的草稿，按一下立即改写成更容易被大模型精准执行的高质量提示词。内置专属免费通道，不消耗对话额度，开箱即用。
+      </p>
+      <div style="display:flex; gap:0.75rem;">
+        <a href="#demo" class="btn btn-primary">在线模拟试用</a>
+        <a href="#install" class="btn btn-outline">安装说明</a>
+      </div>
+    </header>
+
+    <!-- 在线交互模拟器 -->
+    <section class="simulator" id="demo">
+      <div class="sim-header">
+        <div class="sim-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          交互式优化模拟体验
+        </div>
+        <div class="presets">
+          <span style="font-size:0.76rem; color:var(--text-muted); line-height:22px;">试试预设：</span>
+          <button class="preset-btn" onclick="setPrompt('写个快速排序')">算法任务</button>
+          <button class="preset-btn" onclick="setPrompt('登录接口偶发报504怎么排查')">工程排错</button>
+          <button class="preset-btn" onclick="setPrompt('好的，方案很棒，辛苦了')">寒暄/确认</button>
+        </div>
+      </div>
+
+      <div class="sim-box">
+        <textarea id="promptInput" class="sim-textarea" placeholder="输入任意随意的想法或要求，点击右下角「优化」试试..."></textarea>
+        
+        <div class="sim-controls">
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div class="level-tabs">
+              <button class="level-tab" onclick="setLevel('brief', this)">精简</button>
+              <button class="level-tab active" onclick="setLevel('balanced', this)">均衡 (默认)</button>
+              <button class="level-tab" onclick="setLevel('detailed', this)">详细</button>
+            </div>
+            <div class="sim-status">
+              <span class="sim-status-dot"></span>
+              <span>免费通道已就绪</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-outline" style="padding:0.4rem 0.8rem; font-size:0.82rem;" onclick="undoPrompt()">Ctrl+Z 撤销</button>
+            <button id="optimizeBtn" class="btn btn-primary" style="padding:0.4rem 1.1rem; font-size:0.85rem;" onclick="runOptimize()">优化提示词</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 核心特性解析 -->
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      核心特性与设计亮点
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 class="card-title">字面意义的完全免费</h3>
+        <p class="card-desc">
+          插件内置由作者维护的免费模型端点，所有安装者共用，无需填写任何 API Key，不消耗你的当前模型额度。设置页打开时自动发 <code>Hi</code> 进行端到端连通性测试。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">智能性质判断（防过度扩写）</h3>
+        <p class="card-desc">
+          系统先做性质分类：确认、道谢、闲聊或简短提问保持原样精简；只有真正交付的任务才按档位加码。避免让「ok很好」被无意义扩写成一篇带背景和验收标准的论文。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">三级弹性回退保障</h3>
+        <p class="card-desc">
+          若免费端点偶遇网络拥堵或超限，插件绝不会弹报错罢工，而是自动无缝切换至当前会话所用的模型通道继续执行改写，并在设置页记录回退明细。
+        </p>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">深度会话路由探测</h3>
+        <p class="card-desc">
+          通过监听 <code>agent/request</code> 动态捕获当前会话的实际底层调用路由，解决普通插件在浏览器前端无法定位活跃模型绑定的痛点。
+        </p>
+      </div>
+    </div>
+
+    <!-- 优化档位对比 -->
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+      三档优化力度矩阵
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>档位</th>
+          <th>改写策略</th>
+          <th>适用场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>精简</strong></td>
+          <td>只修复错别字、歧义与指代不清，几乎不改变原句长度与语序结构。</td>
+          <td>输入本身已较完整，仅需快速润色和去歧义。</td>
+        </tr>
+        <tr>
+          <td><strong>均衡 (默认)</strong></td>
+          <td>补齐模糊边界，明确输出格式与技术约束，长度适中，信息密度高。</td>
+          <td>绝大多数日常研发、编码与问答任务。</td>
+        </tr>
+        <tr>
+          <td><strong>详细</strong></td>
+          <td>将任务结构化拆解：补充背景意图、执行步骤、技术栈约束与验收准则。</td>
+          <td>复杂系统架构、长篇文档起草或关键代码重构。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 环境变量覆盖 -->
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+      进阶配置：使用自有专属端点
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:0.75rem;">
+      如果你有自己更高并发的私有模型端点，可直接在启动环境中覆盖：
+    </p>
+
+    <div class="code-box">
+      <span>DSH_FREE_CHANNEL_BASE_URL=https://your-endpoint/v1<br>DSH_FREE_CHANNEL_API_KEY=sk-...<br>DSH_FREE_CHANNEL_MODEL=your-model</span>
+    </div>
+
+    <!-- 安装 -->
+    <div class="section-title" id="install">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      安装与启用
+    </div>
+
+    <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:0.75rem;">
+      在 DeepSeek Harness 桌面端打开「设置 ➔ 内置插件」，粘贴包名点击安装并重启：
+    </p>
+    <div class="code-box">
+      <span>dsh-prompt-crafter</span>
+      <button class="btn btn-outline" style="padding:0.25rem 0.6rem; font-size:0.75rem;" onclick="copy('dsh-prompt-crafter')">复制包名</button>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 MCJF28 · <a href="../dsh-plugins/">返回 DSH 插件集</a> · <a href="../">返回项目总导航</a></p>
+  </footer>
+
+  <script>
+    let currentLevel = 'balanced';
+    let previousText = '';
+
+    const presetPrompts = {
+      '写个快速排序': {
+        brief: '请用 Python 编写一段高效的快速排序算法，并附带简要单元测试。',
+        balanced: '请使用 Python 实现标准快速排序（QuickSort）算法：\n1. 要求原地分区（In-place Partition），提供平均和最坏时间复杂度说明；\n2. 包含边界样例（空数组、单元素、含重复元素）的测试代码；\n3. 代码附带详细注释与性能要点说明。',
+        detailed: '【任务目标】\n请以生产级质量实现快速排序（QuickSort）算法。\n\n【技术要求】\n1. 语言：Python 3.10+\n2. 核心逻辑：采用双指针 Lomuto 或 Hoare 原地分区方案，避免额外内存开销；\n3. 优化考量：处理递归深度过大导致的 RecursionError（如三数取中选取 pivot 或小数组插入排序优化）；\n\n【交付物规范】\n- 完整 Python 类或函数实现；\n- 针对极端情况（升序、降序、全重复值）的健壮性分析；\n- 包含 unittest 验证套件。'
+      },
+      '登录接口偶发报504怎么排查': {
+        brief: '用户登录接口偶发返回 504 Gateway Timeout，请列出后端与网关层面的排查清单。',
+        balanced: '生产环境用户登录接口偶发出现 504 Gateway Timeout（网关超时）。请系统化提供定位思路：\n1. 网关层（Nginx/Ingress）超时配置与连接池排查；\n2. 后端服务状态（数据库连接池耗尽、Redis 鉴权阻塞或死锁）；\n3. 监控指标（慢查询、CPU Spike、GC 停顿）的采集排查步骤。',
+        detailed: '【故障现象】\n用户登录接口偶发抛出 504 Gateway Timeout 异常，前端等待超时。\n\n【排查分析任务】\n请从链路追踪全流程输出排查指引：\n- 1. 反向代理层：Nginx proxy_read_timeout、upstream 连接保活与负载均衡节点异常；\n- 2. 应用层：线程池满载、JVM Full GC 停顿或外部 OAuth 供应商网络抖动；\n- 3. 存储层：高并发下账号表的锁争用（Row Lock）、密码哈希计算高占用导致队列积压；\n- 4. 给出即刻缓解手段与长期可观测性建设建议（SkyWalking / Prometheus 指标）。'
+      },
+      '好的，方案很棒，辛苦了': {
+        brief: '好的，方案很棒，辛苦了！',
+        balanced: '收到，方案整体构思清晰完善，感谢付出！',
+        detailed: '收到，方案整体构思清晰完善，感谢付出！'
+      }
+    };
+
+    function setPrompt(text) {
+      document.getElementById('promptInput').value = text;
+    }
+
+    function setLevel(lvl, el) {
+      currentLevel = lvl;
+      document.querySelectorAll('.level-tab').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function runOptimize() {
+      const input = document.getElementById('promptInput');
+      const val = input.value.trim();
+      if (!val) {
+        alert('请先输入一段提示词草稿！');
+        return;
+      }
+      previousText = val;
+
+      const btn = document.getElementById('optimizeBtn');
+      btn.innerText = '优化中…';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerText = '优化提示词';
+        btn.disabled = false;
+
+        if (presetPrompts[val]) {
+          input.value = presetPrompts[val][currentLevel];
+        } else {
+          if (val.length < 8 && (val.includes('好') || val.includes('ok') || val.includes('行'))) {
+            input.value = val;
+          } else if (currentLevel === 'brief') {
+            input.value = `请清晰、准确地完成以下要求：${val}。给出可直接执行的结论。`;
+          } else if (currentLevel === 'balanced') {
+            input.value = `【任务】\n${val}\n\n【要求】\n1. 结构清晰，分步骤或分模块阐述；\n2. 明确给出关键约束与实现细节，保证方案可落地执行。`;
+          } else {
+            input.value = `【任务目标】\n${val}\n\n【执行准则】\n- 深入分析上下文与潜在技术边界；\n- 给出规范化实现代码或系统方案；\n- 列出边缘条件与验收测试标准。`;
+          }
+        }
+      }, 350);
+    }
+
+    function undoPrompt() {
+      if (previousText) {
+        document.getElementById('promptInput').value = previousText;
+      }
+    }
+
+    function copy(text) {
+      navigator.clipboard.writeText(text).then(() => alert('已复制：' + text));
+    }
+  </script>
+</body>
+</html>

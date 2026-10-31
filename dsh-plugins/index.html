@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSH 插件集 · 官方介绍与选型指南</title>
+  <meta name="description" content="专为 DeepSeek Harness (DSH) 桌面版打造的高效开源插件集。全局记忆、提示词优化、可视化卡片与搜索路由分流。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2358a6ff'><circle cx='12' cy='12' r='10'/></svg>">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-hover: #1f242c;
+      --border: #30363d;
+      --border-hover: #58a6ff;
+      --text: #c9d1d9;
+      --text-heading: #f0f6fc;
+      --text-muted: #8b949e;
+      --primary: #58a6ff;
+      --primary-hover: #79c0ff;
+      --accent: #238636;
+      --tag-bg: #21262d;
+      --code-bg: #0a0d12;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      width: 100%;
+    }
+
+    /* Top Nav */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--text-heading);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .nav-brand svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.15s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 3rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.25);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      color: #0d1117;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-heading);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--border-hover);
+      background: var(--card-hover);
+      color: var(--primary);
+    }
+
+    /* Section Styles */
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin: 2.5rem 0 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    /* Plugin Grid */
+    .plugin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .plugin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .plugin-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .plugin-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      text-decoration: none;
+    }
+
+    .plugin-name:hover {
+      color: var(--primary);
+    }
+
+    .plugin-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    .feature-list li {
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+    }
+
+    .feature-list li::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(48, 54, 61, 0.6);
+    }
+
+    /* Tenets Table */
+    .tenet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .tenet-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.2rem;
+    }
+
+    .tenet-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tenet-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Code & Commands */
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.9rem 1.1rem;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      color: #79c0ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .copy-btn:hover {
+      color: var(--text-heading);
+      border-color: var(--primary);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .plugin-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links {
+        gap: 0.75rem;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 顶部导航 -->
+    <nav class="nav-bar">
+      <a href="../" class="nav-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>MCJF28 导航</span>
+      </a>
+      <div class="nav-links">
+        <a href="../cutlass-cute-zh/">CUTLASS 专著</a>
+        <a href="https://github.com/MCJF28/mcjf-dsh-plugins" target="_blank">GitHub 源码</a>
+      </div>
+    </nav>
+
+    <!-- 主介绍区 -->
+    <header class="hero">
+      <div class="badge">开源插件套件 · DeepSeek Harness 桌面端</div>
+      <h1>DSH 插件集与选型指南</h1>
+      <p class="hero-desc">
+        一套用于 DeepSeek Harness 桌面版的高性能扩展套件。每个插件独立成包、按需安装。从全局跨会话记忆、提示词一键升华，到可交互窗口与智能搜索分流，全面拓展本地智能体工作流。
+      </p>
+      <div class="hero-actions">
+        <a href="#catalog" class="btn btn-primary">
+          浏览 4 款核心插件
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="#install" class="btn btn-outline">安装与部署说明</a>
+      </div>
+    </header>
+
+    <!-- 插件选型总览 -->
+    <div class="section-title" id="catalog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+      核心插件独立网站
+    </div>
+
+    <div class="plugin-grid">
+
+      <!-- 1. dsh-prompt-crafter -->
+      <div class="plugin-card">
+        <div>
+          <div class="card-header">
+            <a href="../dsh-prompt-crafter/" class="plugin-name">dsh-prompt-crafter</a>
+            <span class="badge" style="margin-bottom:0">开箱即用 · 免费通道</span>
+          </div>
+          <p class="plugin-desc">
+            输入框发送键旁的优化按钮：草稿写完点一下，自动改写成更容易被执行的规范提示词。
+          </p>
+          <ul class="feature-list">
+            <li><strong>内置免费通道</strong>：无需任何 API Key 或登录，零成本一键改写</li>
+            <li><strong>智能性质判断</strong>：寒暄感谢不强行加码，真正任务才深度拆解</li>
+            <li><strong>三档力度可调</strong>：精简、均衡（默认）、详细，支持 Ctrl+Z 瞬间撤销</li>
+            <li><strong>优雅自动回退</strong>：免费端点拥挤时自动跟随当前对话模型，绝不罢工</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a href="../dsh-prompt-crafter/" class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.84rem;">
+            进入介绍网站与在线演示 ➔
+          </a>
+          <a href="https://github.com/MCJF28/dsh-prompt-crafter" target="_blank" class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.84rem;">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. dsh-visual-card -->
+      <div class="plugin-card">
+        <div>
+          <div class="card-header">
+            <a href="../dsh-visual-card/" class="plugin-name">dsh-visual-card</a>
+            <span class="badge" style="margin-bottom:0">富交互 · 游戏与图表</span>
+          </div>
+          <p class="plugin-desc">
+            可视化回答插件：AI 提交一段 HTML，在对话流里渲染成可交互窗口，能点、能跑脚本、能全屏导出。
+          </p>
+          <ul class="feature-list">
+            <li><strong>真正脚本执行</strong>：按钮交互、Canvas 动画乃至完整 WASD 键盘小游戏</li>
+            <li><strong>独立键盘接管</strong>：Iframe 隔离事件域，点进窗口接管键盘，Esc 瞬间交还</li>
+            <li><strong>内容自动定高</strong>：无需固定框套死，超长自适应内部滚动，不迫使全屏翻页</li>
+            <li><strong>色彩无缝适配</strong>：纯 CSS 变量体系，全自动适配深浅色与宿主主题</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a href="../dsh-visual-card/" class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.84rem;">
+            进入介绍网站与在线沙盒 ➔
+          </a>
+          <a href="https://github.com/MCJF28/dsh-visual-card" target="_blank" class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.84rem;">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. dsh-memory-system-prompt -->
+      <div class="plugin-card">
+        <div>
+          <div class="card-header">
+            <a href="../dsh-memory-system-prompt/" class="plugin-name">dsh-memory-system-prompt</a>
+            <span class="badge" style="margin-bottom:0">跨会话记忆 · 零占上下文</span>
+          </div>
+          <p class="plugin-desc">
+            全局记忆与用户级系统提示词：AI 主动把持久约定写进记忆库，每轮索引注入系统提示词，不吃上下文。
+          </p>
+          <ul class="feature-list">
+            <li><strong>AI 主动写入读取</strong>：提供 memory_save/read 等全套微型持久工具</li>
+            <li><strong>双阶段零冗余</strong>：标题+摘要索引常驻，细节全文按需查阅，杜绝上下文爆炸</li>
+            <li><strong>九维风格微调</strong>：亲切、热情、排版、长度等 9 档行为预设，无需繁冗 prompt</li>
+            <li><strong>按对话灵活开关</strong>：输入框左侧开关支持三态（关 / 部分 / 开）精确控制</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a href="../dsh-memory-system-prompt/" class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.84rem;">
+            进入介绍网站与架构说明 ➔
+          </a>
+          <a href="https://github.com/MCJF28/dsh-memory-system-prompt" target="_blank" class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.84rem;">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- 4. dsh-web-search-router -->
+      <div class="plugin-card">
+        <div>
+          <div class="card-header">
+            <a href="../dsh-web-search-router/" class="plugin-name">dsh-web-search-router</a>
+            <span class="badge" style="margin-bottom:0">智能分流 · 人话报错</span>
+          </div>
+          <p class="plugin-desc">
+            按模型通道智能分流搜索：官方账号走 DeepSeek 官方搜索，第三方通道走自建服务，告别静默 500。
+          </p>
+          <ul class="feature-list">
+            <li><strong>破解单源死锁</strong>：原生 DSH 换第三方模型搜索即报废，本插件双轨全覆盖</li>
+            <li><strong>人话排错提示</strong>：未填 Key、上游鉴权拒绝、网络超时精确归因，杜绝模糊崩溃</li>
+            <li><strong>三级凭据优先级</strong>：账号令牌 ➔ 凭据存储 ➔ 启动环境变量平滑回退</li>
+            <li><strong>标准化接口支持</strong>：原生兼容 Parallel 搜索协议与通用 HTTP 搜索引擎</li>
+          </ul>
+        </div>
+        <div class="card-actions">
+          <a href="../dsh-web-search-router/" class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.84rem;">
+            进入介绍网站与配置指南 ➔
+          </a>
+          <a href="https://github.com/MCJF28/dsh-web-search-router" target="_blank" class="btn btn-outline" style="padding:0.4rem 0.75rem; font-size:0.84rem;">
+            GitHub
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 共同架构取舍 -->
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      共同的架构哲学与取舍
+    </div>
+
+    <div class="tenet-grid">
+      <div class="tenet-box">
+        <div class="tenet-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+          Host 与 Client 分离
+        </div>
+        <p class="tenet-desc">
+          涉及模型可见状态的跑在 Host，纯 UI 逻辑跑在 Client 填槽位。Host 修改重启生效，Client 修改刷新即可。
+        </p>
+      </div>
+
+      <div class="tenet-box">
+        <div class="tenet-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          填槽位，不改造
+        </div>
+        <p class="tenet-desc">
+          严格不修改宿主原有界面代码，只向 Harness 预留槽位注册内容，宿主升级绝不悄悄破坏插件功能。
+        </p>
+      </div>
+
+      <div class="tenet-box">
+        <div class="tenet-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          说人话，不甩堆栈
+        </div>
+        <p class="tenet-desc">
+          配置不对或网络异常时，通知直接明确指出该去修改哪个设置项，杜绝冷冰冰的 500 或一大段调用栈。
+        </p>
+      </div>
+
+      <div class="tenet-box">
+        <div class="tenet-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 8 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+          持久化统一于 ~/.dsh/
+        </div>
+        <p class="tenet-desc">
+          每个插件独占一个子目录，卸载或升级包不会误删用户数据，重装后自动平滑接上所有历史数据。
+        </p>
+      </div>
+    </div>
+
+    <!-- 安装方式 -->
+    <div class="section-title" id="install">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      安装与启用方式
+    </div>
+
+    <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">
+      <strong>推荐方式一：DSH 客户端内置安装程序</strong><br>
+      打开应用内「设置 ➔ 内置插件」，在输入框粘贴对应包名，点击安装后重启应用即可自动注册进 <code style="color:var(--primary)">dsh.profile.bundles</code>：
+    </p>
+
+    <div class="code-box">
+      <span>dsh-prompt-crafter</span>
+      <button class="copy-btn" onclick="copyText('dsh-prompt-crafter')">复制包名</button>
+    </div>
+
+    <p style="font-size:0.9rem; color:var(--text-muted); margin:1.25rem 0 1rem;">
+      <strong>方式二：终端 CLI 命令行安装</strong><br>
+      完全退出应用后，在桌面 profile 目录下执行 pnpm 安装：
+    </p>
+
+    <div class="code-box">
+      <span>cd ~/.dsh/profiles/desktop && pnpm add dsh-prompt-crafter dsh-visual-card dsh-memory-system-prompt dsh-web-search-router</span>
+      <button class="copy-btn" onclick="copyText('cd ~/.dsh/profiles/desktop && pnpm add dsh-prompt-crafter dsh-visual-card dsh-memory-system-prompt dsh-web-search-router')">复制命令</button>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 MCJF28 · <a href="../">返回个人项目总导航</a> · <a href="https://github.com/MCJF28" target="_blank">GitHub Profile</a></p>
+  </footer>
+
+  <script>
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('已复制到剪贴板：' + text);
+      });
+    }
+  </script>
+</body>
+</html>
